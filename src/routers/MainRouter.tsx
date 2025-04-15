@@ -1,4 +1,4 @@
-import { Layout } from "antd";
+import { Affix, Layout } from "antd";
 import SiderComponent from "../components/SiderComponent";
 import HomeScreen from "../screens/HomeScreen";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -11,9 +11,13 @@ const MainRouter = () => {
     return (
         <BrowserRouter>
             <Layout>
-                <SiderComponent />
+                <Affix offsetTop={0}>
+                    <SiderComponent />
+                </Affix>
                 <Layout>
-                    <HeaderComponent />
+                    <Affix offsetTop={0}>
+                        <HeaderComponent />
+                    </Affix>
                     <Content className="mt-3 mb-2 container bg-white">
                         <Routes>
                             <Route path='/' element={<HomeScreen />}></Route>

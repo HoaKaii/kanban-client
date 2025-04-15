@@ -1,12 +1,13 @@
 import { Avatar, Button, Form, Input, Modal, Select, Typography } from "antd";
 import { User } from "iconsax-react";
-import { useRef, useState } from "react";
-import { colors } from "../constants/colors";
-import { uploadFile } from "../utils/uploadFile";
-import { replaceName } from "../utils/replaceName";
-import handleAPI from "../apis/handleAPI";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import handleAPI from "../apis/handleAPI";
+import { colors } from "../constants/colors";
 import { SupplierModel } from "../models/SupplierModel";
+import { replaceName } from "../utils/replaceName";
+import { uploadFile } from "../utils/uploadFile";
+import { demodata } from "../data/demodata";
 
 const { Paragraph } = Typography
 
@@ -27,11 +28,18 @@ const ToogleSupplier = (props: Props) => {
     const [form] = Form.useForm();
     const inpRef = useRef<any>(null);
 
+    useEffect(() => {
+        if (supplier) {
+            form.setFieldsValue(supplier);
+            setIsTaking(supplier.isTaking === 1)
+        }
+    }, [supplier]);
+
     const addNewSupplier = async (values: any) => {
 
         setIsLoading(true);
         const data: any = {};
-        const api = `/supplier/add-new`;
+        const api = `/supplier/${supplier ? `update?id=${supplier._id}` : 'add-new'}`;
 
         for (const i in values) {
             data[i] = values[i] ?? '';
@@ -47,9 +55,9 @@ const ToogleSupplier = (props: Props) => {
         data.slug = replaceName(values.name);
 
         try {
-            const res: any = await handleAPI(api, data, 'post');
+            const res: any = await handleAPI(api, data, supplier ? 'put' : 'post');
             toast(res.message);
-            onAddNew(res.data);
+            !supplier && onAddNew(res.data);
             handleClose();
         } catch (error) {
             console.log(error);
@@ -70,15 +78,17 @@ const ToogleSupplier = (props: Props) => {
             onClose={handleClose}
             onCancel={handleClose}
             onOk={() => form.submit()}
-            okButtonProps={{ 
+            okButtonProps={{
                 loading: isLoading,
-             }}
-            title='Add Supplier'
-            okText='Add Supplier'
+            }}
+            title={supplier ? 'Update Supplier' : 'Add Supplier'}
+            okText={supplier ? 'Update' : 'Add Supplier'}
             cancelText='Discard'>
             <label htmlFor="inpFile" className="p-2 mb-3 row">
                 {file ? (
                     <Avatar size={100} src={URL.createObjectURL(file)} />
+                ) : supplier ? (
+                    <Avatar size={100} src={supplier.photoUrl} />
                 ) : (
                     <Avatar
                         size={100}
@@ -106,7 +116,7 @@ const ToogleSupplier = (props: Props) => {
                     id=''
                     onChange={(val: any) => setFile(val.target.files[0])} />
             </div>
-            <Form 
+            <Form
                 disabled={isLoading}
                 onFinish={addNewSupplier}
                 layout="horizontal"
@@ -120,11 +130,17 @@ const ToogleSupplier = (props: Props) => {
                         required: true,
                         message: 'Enter supplier name'
                     }]}
-                    label='Supplier name'>
+                    label='Supplier Name'>
                     <Input placeholder="Enter supplier name" allowClear />
                 </Form.Item>
                 <Form.Item name={'product'} label='Product'>
                     <Input placeholder="Enter product" allowClear />
+                </Form.Item>
+                <Form.Item name={'email'} label='Email'>
+                    <Input placeholder="Enter email" allowClear type="email"/>
+                </Form.Item>
+                <Form.Item name={'active'} label='Active'>
+                    <Input placeholder="" allowClear type="number"/>
                 </Form.Item>
                 <Form.Item name={'categories'} label='Category'>
                     <Select options={[]} placeholder='Select product category' />
@@ -132,19 +148,19 @@ const ToogleSupplier = (props: Props) => {
                 <Form.Item name={'price'} label='Buying price'>
                     <Input placeholder="Enter buying price" type="number" allowClear />
                 </Form.Item>
-                <Form.Item name={'contact'} label='Contact number'>
+                <Form.Item name={'contact'} label='Contact Number'>
                     <Input placeholder="Enter supplier contact number" allowClear />
                 </Form.Item>
                 <Form.Item label='Type'>
                     <div className="mb-2">
-                        <Button 
+                        <Button
                             size='middle'
                             onClick={() => setIsTaking(false)}
                             type={isTaking === false ? 'primary' : 'default'}>
                             Not taking return
                         </Button>
                     </div>
-                    <Button 
+                    <Button
                         size='middle'
                         onClick={() => setIsTaking(true)}
                         type={isTaking ? 'primary' : 'default'}>
