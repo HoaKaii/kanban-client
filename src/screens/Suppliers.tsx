@@ -135,7 +135,7 @@ const Suppliers = () => {
             // await handleAPI(`/supplier/update?id=${id}`, { isDeleted: true }, 'put');
             // delete
             await handleAPI(`/supplier/remove?id=${id}`, undefined, 'delete');
-            getSuppliers();
+            await getSuppliers();
         } catch (error) {
             console.log(error);
         }
